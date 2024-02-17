@@ -24,8 +24,10 @@ def main():
     add_markers(supabase, m)
 
     # Display map
-    st.title('New York City Sound Map')
+
+    st.title('New York City Garbage Map')
     st_folium(m, width=725, height=500)
+
 
     # Content upload form
     handle_content_upload(supabase)
@@ -51,7 +53,7 @@ def create_marker(map_obj, location, text_description, audio_url, image_url):
     # Use the provided `image_url` and `audio_url` directly in the HTML markup
     audio_html = f"""
     <h4 style = "font-family: EB Garamon">{text_description}</h4>
-    <img src="{image_url}" alt="Image" width="150" height="150" style="margin-left:75px;">
+    <img src="{image_url}" style="transform:rotate(90deg); margin-top:20px; margin-left:20px;" alt="Image" width="250" height="200" >
     <audio controls>
         <source src="{audio_url}" type="audio/mpeg">
         Your browser does not support the audio element.
