@@ -22,13 +22,8 @@ def main():
     
     # Fetch data and add markers
     add_markers(supabase, m)
-
-    # Display map
-
     st.title('New York City Garbage Map')
     st_folium(m, width=725, height=500)
-
-
     # Content upload form
     handle_content_upload(supabase)
 
@@ -45,9 +40,6 @@ def add_markers(supabase, map_obj):
             location = entry['location']
             text_description = entry.get('text_description', 'No description available')
             create_marker(map_obj, location, text_description, audio_url, image_url)
-
-
-
 
 def create_marker(map_obj, location, text_description, audio_url, image_url):
     # Use the provided `image_url` and `audio_url` directly in the HTML markup
@@ -150,6 +142,7 @@ def insert_entry(supabase, text, location, image_url, audio_url):
     else:
         # If the response structure is unexpected or there's an unknown issue
         st.error("Failed to insert data due to an unexpected issue.")
+
 
 # Main execution
 if __name__ == "__main__":
