@@ -1,4 +1,3 @@
 # New York City Garbage Map
-![userImage](src/UI1.png)
-![userImage2](srcUI2.png)
-
+<img src="src/UI1.png" alt="ui" width="200"/>
+<img src="src/UI2.png" alt="ui" width="200"/>
