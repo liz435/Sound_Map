@@ -9,22 +9,19 @@ from dotenv import load_dotenv
 import re
 
 def main():
-    # Load environment variables and initialize Supabase client
     load_dotenv()
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_KEY")
     supabase = create_client(url, key)
     
-    # Initialize map
     zoom_start = 12
-    location = [40.7128, -74.0060]  # Default map center
+    location = [40.7128, -74.0060]  
     m = folium.Map(location=location, zoom_start=zoom_start)
     
-    # Fetch data and add markers
+
     add_markers(supabase, m)
     st.title('New York City Garbage Map')
     st_folium(m, width=725, height=500)
-    # Content upload form
     handle_content_upload(supabase)
 
 def add_markers(supabase, map_obj):
@@ -35,14 +32,13 @@ def add_markers(supabase, map_obj):
 
     for entry in data:
         audio_url = entry['audio_url']
-        image_url = entry['image_url']  # Corrected to use 'image_url'
+        image_url = entry['image_url']  
         if 'location' in entry and entry['location']:
             location = entry['location']
             text_description = entry.get('text_description', 'No description available')
             create_marker(map_obj, location, text_description, audio_url, image_url)
 
 def create_marker(map_obj, location, text_description, audio_url, image_url):
-    # Use the provided `image_url` and `audio_url` directly in the HTML markup
     audio_html = f"""
     <h4 style = "font-family: EB Garamon">{text_description}</h4>
     <img src="{image_url}" style="transform:rotate(90deg); margin-top:20px; margin-left:20px;" alt="Image" width="250" height="200" >
@@ -61,7 +57,7 @@ def create_marker(map_obj, location, text_description, audio_url, image_url):
 
 def handle_content_upload(supabase):
     if st.button('Add Content'):
-        st.session_state['add_content'] = True  # Set a flag in session state
+        st.session_state['add_content'] = True 
 
     if st.session_state.get('add_content', False):
         with st.form("add_content_form", clear_on_submit=True):
@@ -76,22 +72,23 @@ def handle_content_upload(supabase):
                 process_submission(supabase, uploaded_image, uploaded_audio, latitude, longitude, text)
 
 def process_submission(supabase, uploaded_image, uploaded_audio, latitude, longitude, text):
-    if uploaded_image and uploaded_audio and latitude and longitude:
-        # Upload image to Supabase Storage
-        image_url = upload_file_to_storage(supabase, uploaded_image, "Sound_Map_Image")
-        # Upload audio to Supabase Storage
-        audio_url = upload_file_to_storage(supabase, uploaded_audio, "Sound_Map")
         
-        if image_url and audio_url:
-            # Insert entry into the database
+        if uploaded_image is None:
+            image_url = None
+        else: 
+            image_url = upload_file_to_storage(supabase, uploaded_image, "Sound_Map_Image")
+
+        if uploaded_audio is None:
+            audio_url = None
+        else:
+            audio_url = upload_file_to_storage(supabase, uploaded_audio, "Sound_Map")
+        
+        if text and longitude and latitude:
             location = [float(latitude), float(longitude)]
             insert_entry(supabase, text, location, image_url, audio_url)
             st.success("Content uploaded successfully!")
         else:
             st.error("Failed to upload files.")
-    else:
-        st.error("Please upload both an image and an audio file, and enter latitude and longitude.")
-
 def sanitize_filename(filename):
     sanitized = re.sub(r'\s+', '_', filename)
     sanitized = re.sub(r'[^\w.-]', '', sanitized)
@@ -111,14 +108,14 @@ def upload_file_to_storage(supabase, file, bucket_name):
     
     response = supabase.storage.from_(bucket_name).upload(new_file_name, file_bytes)
     
-    # Assuming the response has a status_code attribute
+
     if response.status_code != 200:
-        # Assuming the response has a json method to parse the body
+
         error_message = response.json().get('message', 'Unknown error')
         st.error(f"Failed to upload file: {error_message}")
         return None
     else:
-        # Construct the file URL based on Supabase URL and the new file path
+   
         supabase_url = os.getenv("SUPABASE_URL").rstrip("/")
         file_url = f"{supabase_url}/storage/v1/object/public/{bucket_name}/{new_file_name}"
         return file_url
@@ -132,15 +129,15 @@ def insert_entry(supabase, text, location, image_url, audio_url):
         "audio_url": audio_url
     }).execute()
     
-    # Check for errors in the response
+
     if hasattr(response, 'error') and response.error:
-        # If there is an error attribute and it's not None
+
         st.error(f"An error occurred while inserting the data: {response.error.message}")
     elif hasattr(response, 'data') and response.data:
-        # If the operation was successful, and there's data in the response
+
         st.success("Data inserted successfully")
     else:
-        # If the response structure is unexpected or there's an unknown issue
+
         st.error("Failed to insert data due to an unexpected issue.")
 
 
